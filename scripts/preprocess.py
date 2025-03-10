@@ -1,34 +1,18 @@
 import pandas as pd
-import os
-
-input_folder = "data/raw/"
-output_folder = "data/processed/"
-os.makedirs(output_folder, exist_ok=True)
 
 def preprocess_data(ticker):
-    """
-    Read raw stock data, clean missing values, compute daily returns, and save processed data.
-    """
-    file_path = f"{input_folder}{ticker}.csv"
-    df = pd.read_csv(file_path, index_col="Date", parse_dates=True)
-
-    # Keep only Adjusted Close price
-    df = df[["Adj Close"]].rename(columns={"Adj Close": "Price"})
+    file_path = f"data/raw/{ticker}.csv"
     
-    # Compute daily returns
-    df["Returns"] = df["Price"].pct_change()
+    # Skip first two rows and set the correct column names
+    df = pd.read_csv(file_path, skiprows=2, index_col=0, parse_dates=True)
     
-    # Drop missing values
-    df.dropna(inplace=True)
+    # Rename index to 'Date' for clarity
+    df.index.name = "Date"
     
-    # Save processed data
-    processed_file_path = f"{output_folder}{ticker}.csv"
-    df.to_csv(processed_file_path)
-    print(f"Processed data saved: {processed_file_path}")
+    print(df.head())  # Debugging: Check the output
 
-    return df
+    # Save the cleaned file
+    df.to_csv(f"data/processed/{ticker}_cleaned.csv")
 
-if __name__ == "__main__":
-    tickers = ["TSLA", "BND", "SPY"]
-    for ticker in tickers:
-        preprocess_data(ticker)
+# Example usage
+preprocess_data("BND")
